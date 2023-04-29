@@ -36,6 +36,11 @@ MASK_PLAYER_SOLID <-
     Constants.FContents.CONTENTS_MONSTER |
     Constants.FContents.CONTENTS_GRATE;
 
+MASK_PLAYER_SOLID_BRUSH_ONLY <-
+    Constants.FContents.CONTENTS_SOLID |
+    Constants.FContents.CONTENTS_WINDOW |
+    Constants.FContents.CONTENTS_GRATE;
+
 MASK_ATTACK_TRACE <-
     Constants.FContents.CONTENTS_SOLID |
     Constants.FContents.CONTENTS_PLAYERCLIP |
@@ -222,3 +227,89 @@ GetOppositeTeam <- function(team)
 
     return Constants.ETFTeam.TEAM_INVALID;
 }
+
+TraceLine <- function(startPos, endPos, mask, ignore)
+{
+    local tr =
+    {
+        "start": startPos,
+        "end": endPos,
+        "mask": mask,
+        "ignore": ignore
+    };
+    TraceLineEx(tr);
+    return tr;
+}
+
+TraceBox <- function(startPos, endPos, mins, maxs, mask, ignore)
+{
+    local tr =
+    {
+        "start": startPos,
+        "end": endPos,
+        "hullmin": mins,
+        "hullmax": maxs,
+        "mask": mask,
+        "ignore": ignore
+    };
+    TraceHull(tr);
+    return tr;
+}
+
+GetButtons <- function(player)
+{
+    return NetProps.GetPropInt(player, "m_nButtons");
+}
+
+GetWishDir <- function(player)
+{
+    local buttons = GetButtons(player);
+    local forward = player.GetForwardVector();
+    local right = player.GetRightVector();
+    local wish =
+    {
+        "dir": Vector(0, 0, 0),
+        "valid": false
+    }
+
+    if (buttons & Constants.FButtons.IN_FORWARD)
+    {
+        wish.dir += forward;
+    }
+    else if (buttons & Constants.FButtons.IN_BACK)
+    {
+        wish.dir -= forward;
+    }
+    if (buttons & Constants.FButtons.IN_MOVERIGHT)
+    {
+        wish.dir += right;
+    }
+    else if (buttons & Constants.FButtons.IN_MOVELEFT)
+    {
+        wish.dir -= right;
+    }
+
+    if (wish.dir.Length() <= Constants.Math.Epsilon)
+    {
+        return wish;
+    }
+
+    wish.dir.Norm();
+    wish.valid = true;
+    return wish;
+}
+
+GetGroundEntity <- function(ent)
+{
+    if (!NetProps.HasProp(ent, "m_hGroundEntity"))
+    {
+        return null;
+    }
+    local ground = NetProps.GetPropEntity(ent, "m_hGroundEntity");
+    if (ground == null || !ground.IsValid())
+    {
+        return null;
+    }
+    return ground;
+}
+
