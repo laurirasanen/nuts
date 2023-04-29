@@ -68,7 +68,7 @@ function Think()
     return 0;
 }
 
-function GetJumpCooldown(ply)
+::GetJumpCooldown <- function(ply)
 {
     local cooldown = ::nuts_wallrun_players[ply.entindex()].last_jump + WALL_JUMP_INTERVAL - Time();
     if (cooldown < 0)
@@ -78,7 +78,7 @@ function GetJumpCooldown(ply)
     return cooldown;
 }
 
-function PrintJumpCharge(ply)
+::PrintJumpCharge <- function(ply)
 {
     local cooldown = GetJumpCooldown(ply);
     local chargeBars = 0;
@@ -105,7 +105,7 @@ function PrintJumpCharge(ply)
     ClientPrint(ply, Constants.EHudNotify.HUD_PRINTCENTER, chargeText);
 }
 
-function CheckPlayer(ply)
+::CheckPlayer <- function(ply)
 {
     local ground = GetGroundEntity(ply);
     if (ground != null)
@@ -152,10 +152,10 @@ function CheckPlayer(ply)
     return normal;
 }
 
-if (!("nuts_wallrun" in getroottable()))
+if (!("nuts_wallrun_loaded" in getroottable()))
 {
-    Log("nuts_wallrun init");
-    ::nuts_wallrun <- true;
+    Log("nuts/wallrun init");
+    ::nuts_wallrun_loaded <- true;
     ::nuts_wallrun_players <- {};
     for (local i = 0; i < Constants.Server.MAX_PLAYERS; i+=1)
     {
@@ -164,7 +164,7 @@ if (!("nuts_wallrun" in getroottable()))
 
     if (!("HOOKED_EVENTS" in getroottable()))
     {
-        Log("nuts_wallrun hook events");
+        Log("nuts/wallrun hook events");
         __CollectGameEventCallbacks(this);
         ::HOOKED_EVENTS <- true;
     }
@@ -172,13 +172,13 @@ if (!("nuts_wallrun" in getroottable()))
     local thinker = SpawnEntityFromTable("info_target", { targetname = "nuts_wallrun_thinker" } );
     if(thinker.ValidateScriptScope())
     {
-        Log("nuts_wallrun thinker valid");
+        Log("nuts/wallrun thinker valid");
         thinker.GetScriptScope()["Think"] <- Think;
         AddThinkToEnt(thinker, "Think");
     }
 }
 else
 {
-    Log("nuts_wallrun already init");
+    Log("nuts/wallrun already init");
 }
 
